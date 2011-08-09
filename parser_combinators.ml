@@ -81,7 +81,7 @@ let drop p = p >> mzero
 
 let drop_opt p = drop p ||| mzero
 
-let sep_by1 p sep = p >>:: many (drop sep >>:: p)
+let sep_by1 p sep = p >>:: many (drop sep >> p)
 
 let sep_by p sep = sep_by1 p sep ||| mzero
 

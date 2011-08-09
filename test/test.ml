@@ -34,17 +34,36 @@ let () =
     assert (s2 = run_test p s2)
 
 let () =
-    let p   = drop (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
-    let s   = "xo" in
-    let res = "o" in
-    assert (res = run_test p s)
+    let p = drop (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
+    let s = "xo" in
+    let r = "o" in
+    assert (r = run_test p s)
 
 let () =
-    let p   = drop_opt (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
+    let p = drop (string "x") >>@ string "o" in
+    let s = "xo" in
+    let r = "o" in
+    assert (r = run_test p s)
+
+let () =
+    let p   = drop_opt (string "x") >>@ string "o" in
     let s1  = "xo" in
     let s2  = "o" in
     assert (s2 = run_test p s1);
     assert (s2 = run_test p s2)
+
+let () =
+    let p  = sep_by1 digit (char '.') in
+    let s1 = "1" in
+    let s2 = "1.2.3" in
+    let r2 = "123" in
+    assert (s1 = run_test p s1);
+    assert (r2 = run_test p s2)
+
+
+
+
+
 
 
 
