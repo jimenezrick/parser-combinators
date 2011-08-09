@@ -1,4 +1,6 @@
 OC=ocamlc
+OFLAGS=
+
 STD_DEPS=str.cma
 DEPS=backpack.cmo parser_combinators.cmo
 
@@ -7,20 +9,22 @@ DEPS=backpack.cmo parser_combinators.cmo
 all:
 
 test/test: $(DEPS) test/test.cmo
-	$(OC) -o test/test $(STD_DEPS) $(DEPS) test/test.cmo
+	$(OC) $(OFLAGS) -o test/test $(STD_DEPS) $(DEPS) test/test.cmo
 
+test: OFLAGS=-g
 test: test/test
+	@export OCAMLRUNPARAM=b
 	@test/test
 
 %.cmi: %.mli
-	$(OC) -c $<
+	$(OC) $(OFLAGS) -c $<
 
 %.cmo: %.ml
-	$(OC) -c $<
+	$(OC) $(OFLAGS) -c $<
 
 # TODO: use ocamlopt
 #%.cmx: %.ml
-#	$(OC) $<
+#	$(OC) $(OFLAGS) $<
 
 clean:
 	rm -f *.cm* */*.cm*
