@@ -2,13 +2,15 @@ OC=ocamlc
 STD_DEPS=str.cma
 DEPS=backpack.cmo parser_combinators.cmo
 
-.PHONY: clean
+.PHONY: test clean
 
-#all:
+all:
 
-test: $(DEPS) test/test.cmo
+test/test: $(DEPS) test/test.cmo
 	$(OC) -o test/test $(STD_DEPS) $(DEPS) test/test.cmo
-	test/test
+
+test: test/test
+	@test/test
 
 %.cmi: %.mli
 	$(OC) -c $<
