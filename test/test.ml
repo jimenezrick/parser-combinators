@@ -20,22 +20,40 @@ let () =
     assert (s2 = run_test p2 s2)
 
 let () =
-    let p = opt (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
+    let p  = opt (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
     let s1 = "o" in
     let s2 = "xo" in
     assert (s1 = run_test p s1);
     assert (s2 = run_test p s2)
 
 let () =
-    let p = opt nat >>@ word in
+    let p  = opt nat >>@ word in
     let s1 = "123abc" in
     let s2 = "abc" in
     assert (s1 = run_test p s1);
     assert (s2 = run_test p s2)
 
+let () =
+    let p   = drop (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
+    let s   = "xo" in
+    let res = "o" in
+    assert (res = run_test p s)
+
+let () =
+    let p   = drop_opt (char 'x' >>:: mzero) >>@ (char 'o' >>:: mzero) in
+    let s1  = "xo" in
+    let s2  = "o" in
+    assert (s2 = run_test p s1);
+    assert (s2 = run_test p s2)
 
 
 
+(*
+let () =
+    let p =
+    let s =
+    assert (s = run_test p s)
+*)
 
 
 let () =
