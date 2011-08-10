@@ -82,6 +82,28 @@ let () =
     let r = "x" in
     assert (r = run_test p s)
 
+let () =
+    let p = between (string "[") nat (string "]") in
+    let s = "[666]" in
+    let r = "666" in
+    assert (r = run_test p s)
+
+
+
+
+
+
+
+
+
+
+let () =
+    let p = chainl1 nat (char '+') in
+    let s = "1+2" in
+    assert (s = run_test p s)
+
+
+
 
 
 
