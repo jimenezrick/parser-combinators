@@ -91,7 +91,7 @@ let sep_by1 p sep = p >>:: many (drop sep >> p)
 
 let sep_by p sep = sep_by1 p sep ||| mzero
 
-let between o p c = drop o >>:: p >>:: drop c
+let between o p c = drop o >>@ p >>@ drop c
 
 let chainl1 p op =
     let rec rest x =

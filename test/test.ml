@@ -68,8 +68,19 @@ let () =
     assert (s1 = run_test p s1);
     assert (r2 = run_test p s2)
 
+let () =
+    let p  = sep_by digit (string ".") in
+    let s1 = "" in
+    let s2 = "1.2.3" in
+    let r2 = "123" in
+    assert (s1 = run_test p s1);
+    assert (r2 = run_test p s2)
 
-
+let () =
+    let p = between (string "[") (string "x") (string "]") in
+    let s = "[x]" in
+    let r = "x" in
+    assert (r = run_test p s)
 
 
 
