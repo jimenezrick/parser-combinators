@@ -1,3 +1,9 @@
+(*
+ * Simple monadic parser combinators library:
+ *
+ * Pure functional joy
+ *)
+
 type input = {cursor: int; text: string}
 
 type 'a t = input -> ('a * input) list
