@@ -1,8 +1,8 @@
 OC=ocamlc
 OFLAGS=
-
-STD_DEPS=str.cma
-DEPS=backpack.cmo parser_combinators.cmo
+MODS=backpack.ml parser_combinators.ml
+DEPS=$(MODS:.ml=.cmo)
+STD_DEPS=
 
 .PHONY: test clean
 
@@ -17,14 +17,14 @@ test: test/test
 	@test/test
 
 %.cmi: %.mli
-	$(OC) $(OFLAGS) -c $<
+	$(OC) $(OFLAGS) $<
 
 %.cmo: %.ml
 	$(OC) $(OFLAGS) -c $<
 
-# TODO: use ocamlopt
-#%.cmx: %.ml
-#	$(OC) $(OFLAGS) $<
+%.cmx: OC=ocamlopt
+%.cmx: %.ml
+	$(OC) $(OFLAGS) -c $<
 
 clean:
 	rm -f *.cm* */*.cm*
