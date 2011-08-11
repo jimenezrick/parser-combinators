@@ -1,34 +1,39 @@
 OC=ocamlc
 OFLAGS=
+OEXT=cmo
 
 MODS=backpack.ml parser_combinators.ml
-DEPS=$(MODS:.ml=.cmo)
+DEPS=$(MODS:.ml=.$(OEXT))
 STD_DEPS=
 
 TESTS_MODS=$(wildcard test/*.ml)
-TESTS_DEPS=$(TESTS_MODS:.ml=.cmo)
+TESTS_DEPS=$(TESTS_MODS:.ml=.$(OEXT))
 TESTS=$(TESTS_MODS:.ml=)
 
-.PHONY: all test clean
+.PHONY: all all-native test test-native clean
 
 all:
+
+all-native: OC=ocamlopt
+all-native: OEXT=cmx
+all-native: all
 
 test: OFLAGS=-g
 test: $(TESTS)
 	@export OCAMLRUNPARAM=b
 	@for t in $?; do $$t; done
 
+test-native: OC=ocamlopt
+test-native: OEXT=cmx
+test-native: test
+
 $(TESTS): $(DEPS) $(TESTS_DEPS)
-	$(OC) $(OFLAGS) -o $@ $(STD_DEPS) $(DEPS) $@.cmo
+	$(OC) $(OFLAGS) -o $@ $(STD_DEPS) $(DEPS) $@.$(OEXT)
 
 %.cmi: %.mli
 	$(OC) $(OFLAGS) $<
 
-%.cmo: %.ml
-	$(OC) $(OFLAGS) -c $<
-
-%.cmx: OC=ocamlopt
-%.cmx: %.ml
+%.$(OEXT): %.ml
 	$(OC) $(OFLAGS) -c $<
 
 clean:
