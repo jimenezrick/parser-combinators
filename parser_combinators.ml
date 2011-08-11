@@ -117,8 +117,6 @@ let pred p =
     item >>= fun x ->
         if p x then return x else fail
 
-let any = pred (fun _ -> true)
-
 let rec skip_many1 p = p >> skip_many1 p
 
 let end_by p sep = many (p >>:: drop sep)
@@ -134,6 +132,8 @@ let rec count n p =
     | n when n < 0 -> fail
     | 0            -> mzero
     | n            -> p >>:: count (n - 1) p
+
+let any = pred (fun _ -> true)
 
 let char c = pred (fun c' -> c = c')
 
