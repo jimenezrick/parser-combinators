@@ -100,14 +100,14 @@ let chainl1 p op =
          rest (f x y)) ||| return x
     in p >>= rest
 
-let chainl p op x = chainl1 p op ||| return x
-
 let rec chainr1 p op =
     let rest x =
         (op           >>= fun f ->
          chainr1 p op >>= fun y ->
          return (f x y)) ||| return x
     in p >>= rest
+
+let chainl p op x = chainl1 p op ||| return x
 
 let chainr p op x = chainr1 p op ||| return x
 

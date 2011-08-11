@@ -88,20 +88,55 @@ let () =
     let r = "666" in
     assert (r = run_test p s)
 
-
-
-
-
-
-
-
-
+let () =
+    let p  = chainl1 integer arith_op in
+    let s1 = "1" in
+    let s2 = "1+2-3" in
+    let s3 = "-1+2" in
+    let s4 = "-1+2*3" in
+    let r1 = Some 1 in
+    let r2 = Some 0 in
+    let r3 = Some 1 in
+    let r4 = Some 3 in
+    assert (r1 = run_parser p s1);
+    assert (r2 = run_parser p s2);
+    assert (r3 = run_parser p s3);
+    assert (r4 = run_parser p s4)
 
 let () =
-    let p = chainl1 integer arith_op in
-    let s = "1+2-3-4" in
-    let r = Some (-4) in
-    assert (r = run_parser p s)
+    let p  = chainr1 integer arith_op in
+    let s1 = "1" in
+    let s2 = "1+2-3" in
+    let s3 = "-1+2" in
+    let s4 = "-1+2*3" in
+    let r1 = Some 1 in
+    let r2 = Some 0 in
+    let r3 = Some 1 in
+    let r4 = Some 5 in
+    assert (r1 = run_parser p s1);
+    assert (r2 = run_parser p s2);
+    assert (r3 = run_parser p s3);
+    assert (r4 = run_parser p s4)
+
+let () =
+    let p  = chainl integer arith_op 0 in
+    let s1 = "" in
+    let s2 = "-1+2*3" in
+    let r1 = Some 0 in
+    let r2 = Some 3 in
+    assert (r1 = run_parser p s1);
+    assert (r2 = run_parser p s2)
+
+let () =
+    let p  = chainr integer arith_op 0 in
+    let s1 = "" in
+    let s2 = "-1+2*3" in
+    let r1 = Some 0 in
+    let r2 = Some 5 in
+    assert (r1 = run_parser p s1);
+    assert (r2 = run_parser p s2)
+
+
 
 
 
