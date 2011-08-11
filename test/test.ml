@@ -98,9 +98,7 @@ let () =
 
 
 let () =
-    (* TODO: creat let natural = aqui lo convertimos un nat en int real *)
-    let real_nat = nat >>= fun x -> return (int_of_string (Backpack.implode x)) in
-    let p = chainl1 real_nat arith_op in
+    let p = chainl1 integer arith_op in
     let s = "1+2-3-4" in
     let r = Some (-4) in
     assert (r = run_parser p s)

@@ -113,10 +113,6 @@ let chainr p op x = chainr1 p op ||| return x
 
 let choice ps = List.fold_right ( ||| ) ps mzero
 
-let pred p =
-    item >>= fun x ->
-        if p x then return x else fail
-
 let rec skip_many1 p = p >> skip_many1 p
 
 let end_by p sep = many (p >>:: drop sep)
@@ -133,15 +129,13 @@ let rec count n p =
     | 0            -> mzero
     | n            -> p >>:: count (n - 1) p
 
+let pred p =
+    item >>= fun x ->
+        if p x then return x else fail
+
 let any = pred (fun _ -> true)
 
 let char c = pred (fun c' -> c = c')
-
-let string s =
-    let rec string' = function
-        | []      -> mzero
-        | c :: cs -> char c >>:: string' cs
-    in string' (Backpack.explode s)
 
 let digit = pred (fun c -> '0' <= c && c <= '9')
 
@@ -170,6 +164,22 @@ let sep = space ||| eol
 let junk = many sep
 
 let token p = junk >> p
+
+let integer_of_token p =
+    p >>= fun x ->
+    return (int_of_string (Backpack.implode x))
+
+let natural = integer_of_token nat
+
+let negative = integer_of_token neg
+
+let integer = negative ||| natural
+
+let string s =
+    let rec string' = function
+        | []      -> mzero
+        | c :: cs -> char c >>:: string' cs
+    in string' (Backpack.explode s)
 
 let symbol s = token (string s)
 
