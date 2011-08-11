@@ -25,6 +25,8 @@ test: $(TESTS)
 
 test-native: OC=ocamlopt
 test-native: OEXT=cmx
+test-native: STD_DEPS=$(STD_DEPS:.cma=.cmxa)
+test-native: TESTS_DEPS=$(TESTS_MODS:.ml=.$(OEXT))
 test-native: test
 
 $(TESTS): $(DEPS) $(TESTS_DEPS)
