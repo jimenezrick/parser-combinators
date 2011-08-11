@@ -6,6 +6,12 @@ let run_test p s =
     | Some s -> Backpack.implode s
 
 let () =
+    let p = ( >>? ) (+) integer integer in
+    let s = "1-2" in
+    let r = Some (-1) in
+    assert (r = run_parser p s)
+
+let () =
     let p = ((char '-' >>:: nat) <|> neg) >>@ word in
     let s = "-123word" in
     assert (s = run_test p s)
@@ -136,10 +142,17 @@ let () =
     assert (r1 = run_parser p s1);
     assert (r2 = run_parser p s2)
 
+let () =
+    let p = choice [string "x"; nat] in
+    let s = "666" in
+    assert (s = run_test p s)
 
-
-
-
+let () =
+    let p1 = choice  [string "x"; nat] in
+    let p2 = choice1 [string "y"; neg] in
+    let p  = p1 >>@ p2 in
+    let s  = "1-2" in
+    assert (s = run_test p s)
 
 
 

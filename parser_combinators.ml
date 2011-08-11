@@ -52,15 +52,16 @@ let ( >>= ) p f =
 
 let ( >> ) p q = p >>= fun _ -> q
 
-let ( >>:: ) p q =
+let ( >>? ) f p q =
     p >>= fun x ->
     q >>= fun y ->
-    return (x :: y)
+    return (f x y)
 
-let ( >>@ ) p q =
-    p >>= fun x ->
-    q >>= fun y ->
-    return (x @ y)
+let ( >>:: ) p q =
+    let cons = fun x xs -> x :: xs in
+    ( >>? ) cons p q
+
+let ( >>@ ) p q = ( >>? ) ( @ ) p q
 
 let ( ||| ) p q =
     fun input ->
@@ -68,6 +69,7 @@ let ( ||| ) p q =
         | [] -> q input
         | x  -> x
 
+(* Non-deterministic alternative operator, tries all possibilities *)
 let ( <|> ) p q = fun input -> p input @ q input
 
 let ( <?> ) p info = p ||| fun input -> raise (Error (info, input))
@@ -111,7 +113,9 @@ let chainl p op x = chainl1 p op ||| return x
 
 let chainr p op x = chainr1 p op ||| return x
 
-let choice ps = List.fold_right ( ||| ) ps mzero
+let choice ps = List.fold_right ( <|> ) ps mzero
+
+let choice1 ps = List.fold_right ( ||| ) ps mzero
 
 let rec skip_many1 p = p >> skip_many1 p
 
@@ -203,6 +207,7 @@ let take_next_chars input n =
     then String.sub input.text input.cursor len
     else String.sub input.text input.cursor n
 
+(* Applies parser to the input and takes the first result if there is any *)
 let parse p s =
     match p (input_of_string s) with
     | []          -> None
