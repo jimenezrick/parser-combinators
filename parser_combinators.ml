@@ -117,7 +117,9 @@ let choice ps = List.fold_right ( <|> ) ps mzero
 
 let choice1 ps = List.fold_right ( ||| ) ps mzero
 
-let rec skip_many1 p = p >> skip_many1 p
+let skip_many p = drop (many p)
+
+let skip_many1 p = drop (many1 p)
 
 let end_by p sep = many (p >>:: drop sep)
 

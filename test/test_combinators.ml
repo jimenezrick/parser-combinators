@@ -154,6 +154,22 @@ let () =
     let s  = "1-2" in
     assert (s = run_test p s)
 
+let () =
+    let p  = (skip_many (char '.')) >>@ nat in
+    let s1 = "123" in
+    let s2 = "...123" in
+    let r  = "123" in
+    assert (r = run_test p s1);
+    assert (r = run_test p s2)
+
+let () =
+    let p = (skip_many1 (char '.')) >>@ nat in
+    let s = "...123" in
+    let r = "123" in
+    assert (r = run_test p s)
+
+
+
 
 
 
