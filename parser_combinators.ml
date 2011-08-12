@@ -117,6 +117,19 @@ let choice ps = List.fold_right ( <|> ) ps mzero
 
 let choice1 ps = List.fold_right ( ||| ) ps mzero
 
+(*
+ * If `skip_many' were defined as:
+ *
+ *     let rec skip_many p = p >> skip_many p ||| mzero
+ *
+ * It would cause an infinite loop because first `p' is evaluated, then
+ * `skip_many p' and finally `>>'. So if `p' fails, `skip_many p' is evaluated
+ * no matter what giving an infinite loop before we can stop with `>>'.
+ *
+ * The definition of `many' solves this problem using the operator `>>='
+ * directly creating some lambdas. Therefore, the evaluation of a lambda body
+ * is suspended until it is needed.
+ *)
 let skip_many p = drop (many p)
 
 let skip_many1 p = drop (many1 p)
