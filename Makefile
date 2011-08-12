@@ -20,8 +20,7 @@ all:
 	# TODO: Noting yet!
 
 test: $(TESTS)
-	@export OCAMLRUNPARAM=b
-	@for t in $?; do $$t; done
+	@export OCAMLRUNPARAM=b; for t in $?; do $$t; done
 
 $(TESTS): OFLAGS=-g
 $(TESTS): $(DEPS) $(TESTS_DEPS)
