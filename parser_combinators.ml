@@ -134,9 +134,9 @@ let skip_many p = drop (many p)
 
 let skip_many1 p = drop (many1 p)
 
-let end_by p sep = many (p >>:: drop sep)
+let end_by p sep = many (p >>= fun x -> sep >> return x)
 
-let end_by1 p sep = p >>:: drop sep >>:: end_by p sep
+let end_by1 p sep = many1 (p >>= fun x -> sep >> return x)
 
 let many_till p until = many p >>:: drop until
 

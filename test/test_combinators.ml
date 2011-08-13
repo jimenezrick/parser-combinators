@@ -168,8 +168,20 @@ let () =
     let r = "123" in
     assert (r = run_test p s)
 
+let () =
+    let p  = end_by digit (char ';') in
+    let s1 = "" in
+    let s2 = "1;2;3;" in
+    let r1 = "" in
+    let r2 = "123" in
+    assert (r1 = run_test p s1);
+    assert (r2 = run_test p s2)
 
-
+let () =
+    let p = end_by1 digit (char ';') in
+    let s = "1;2;3;" in
+    let r = "123" in
+    assert (r = run_test p s)
 
 
 
