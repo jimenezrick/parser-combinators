@@ -50,3 +50,24 @@ module Str =
                 | c :: l -> res.[i] <- c; implode' (i + 1) l
             in implode' 0 l
     end
+
+module InfiniteList =
+    struct
+        type 'a infinite_list =
+            | Nil
+            | Cons of 'a * (unit -> 'a infinite_list)
+
+        let head = function
+            | Nil         -> None
+            | Cons (x, _) -> Some x
+
+        let rec tail = function
+            | Nil         -> None
+            | Cons (_, f) -> Some (f ())
+
+        let rec range n0 inc = Cons (n0, fun () -> range (n0 + inc) inc)
+
+        let range0 inc = range 0 inc
+
+        let range_naturals = range0 1
+    end
