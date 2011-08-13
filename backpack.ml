@@ -71,3 +71,50 @@ module InfiniteList =
 
         let range_naturals = range0 1
     end
+
+module LazyList =
+    struct
+        type 'a lazy_node =
+            | Nil
+            | Cons of 'a * 'a lazy_list
+        and 'a lazy_list = 'a lazy_node Lazy.t
+
+        let from f =
+            let rec next n =
+                match f n with
+                | None   -> Nil
+                | Some x -> Cons (x, lazy (next (n + 1)))
+            in lazy (next 0)
+
+        let of_list l =
+            let rec next = function
+                | []      -> Nil
+                | x :: xs -> Cons (x, lazy (next xs))
+            in lazy (next l)
+
+        let of_string s =
+            let rec next n =
+                try Cons (String.get s n, lazy (next (n + 1))) with
+                | Invalid_argument _ -> Nil
+            in lazy (next 0)
+
+        let of_stream s =
+            let rec next () =
+                try Cons (Stream.next s, lazy (next ())) with
+                | Stream.Failure -> Nil
+            in lazy (next ())
+
+        let of_channel c = of_stream (Stream.of_channel c)
+
+        let force l =
+            match Lazy.force l with
+            | Nil         -> None
+            | Cons (h, t) -> Some (h, t)
+
+        let rec map f l =
+            lazy (
+                match Lazy.force l with
+                | Nil         -> Nil
+                | Cons (h, t) -> Cons (f h, map f t)
+            )
+    end
