@@ -6,9 +6,35 @@
 
 type input = {cursor: int; text: string}
 
-type 'a t = input -> ('a * input) list
+type 'a parser = input -> ('a * input) list
 
 exception Error of string * input
+
+
+
+
+
+
+(*
+
+type string_input = {cursor: int; string: string}
+
+type stream_input = {cursor: int; buffer: Buffer.t; stream: Stream.t}
+
+type input =
+    | StringInput of string_input
+    | StreamInput of stream_input
+    | LazyListInput of
+
+
+
+
+*)
+
+
+
+
+
 
 let input_of_string s = {cursor = 0; text = s}
 
@@ -216,11 +242,25 @@ let arith_op =
     (char '*' >> return ( * )) |||
     (char '/' >> return ( / ))
 
+
+
+
+
+(* FIXME FIXME: no usar directamente input.text *)
+(* FIXME FIXME: no usar directamente input.text *)
+(* FIXME FIXME: no usar directamente input.text *)
 let take_next_chars input n =
     let len  = String.length input.text - input.cursor in
     if n > len
     then String.sub input.text input.cursor len
     else String.sub input.text input.cursor n
+(* FIXME FIXME FIXME *)
+(* FIXME FIXME FIXME *)
+(* FIXME FIXME FIXME *)
+
+
+
+
 
 (* Applies parser to the input and takes the first result if there is any *)
 let parse p s =

@@ -53,15 +53,15 @@ module Str =
 
 module InfiniteList =
     struct
-        type 'a infinite_list =
+        type 'a t =
             | Nil
-            | Cons of 'a * (unit -> 'a infinite_list)
+            | Cons of 'a * (unit -> 'a t)
 
         let head = function
             | Nil         -> None
             | Cons (x, _) -> Some x
 
-        let rec tail = function
+        let tail = function
             | Nil         -> None
             | Cons (_, f) -> Some (f ())
 
@@ -74,10 +74,10 @@ module InfiniteList =
 
 module LazyList =
     struct
-        type 'a lazy_node =
+        type 'a node =
             | Nil
-            | Cons of 'a * 'a lazy_list
-        and 'a lazy_list = 'a lazy_node Lazy.t
+            | Cons of 'a * 'a t
+        and 'a t = 'a node Lazy.t
 
         let from f =
             let rec next n =
