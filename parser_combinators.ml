@@ -186,7 +186,7 @@ let token p = junk >> p
 
 let integer_of_token p =
     p >>= fun x ->
-    return (int_of_string (Backpack.implode x))
+    return (int_of_string (Backpack.Str.implode x))
 
 let natural = integer_of_token nat
 
@@ -198,7 +198,7 @@ let string s =
     let rec string' = function
         | []      -> mzero
         | c :: cs -> char c >>:: string' cs
-    in string' (Backpack.explode s)
+    in string' (Backpack.Str.explode s)
 
 let symbol s = token (string s)
 

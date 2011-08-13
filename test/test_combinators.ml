@@ -3,7 +3,7 @@ open Parser_combinators
 let run_test p s =
     match run_parser p s with
     | None   -> assert false
-    | Some s -> Backpack.implode s
+    | Some s -> Backpack.Str.implode s
 
 let () =
     let p = ( >>? ) (+) integer integer in
