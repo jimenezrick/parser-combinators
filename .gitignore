@@ -2,3 +2,4 @@
 *.cm*
 *.o
 test/test*
+!test/test*.ml
