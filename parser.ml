@@ -83,30 +83,41 @@ let next_lazy_list input =
     | None             -> None
     | Some (c, input') -> Some (c, LazyListInput input')
 
+
+
+
+
+
+
 let take n input =
-    let b = Buffer.create n in
-    while not (empty input) do
-        let Some (c, _) = next input in
-        Buffer.add_char b c
-    done;
-    Buffer.contents b
+    let rec take' b input = function
+        | 0 -> Buffer.contents b
+        | n ->
+                let Some (c, input') = next input in
+                Buffer.add_char b c;
+                take' b input' (n - 1)
+    in take' (Buffer.create n) input n
 
 let print_error info input =
-    let show_next_input =
+    let next_input =
         if empty input
         then "before EOF"
         else "when parsing: \"" ^ take 10 input ^ "\""
     in
-    prerr_string ("Parse error: expecting `" ^ info ^ "' " ^ show_next_input);
+    prerr_string ("Parse error: expecting `" ^ info ^ "' " ^ next_input);
     prerr_newline ();
     None
 
 (* Applies parser to the input and takes the first result if there is any *)
 let parse p s =
-    match p (input_of_string s) with
+    match p s with
     | []          -> None
     | (x, _) :: _ -> Some x
+
+let parse_string p s = parse p (input_of_string s)
 
 let run_parser p s =
     try parse p s with
     | Error (info, input) -> print_error info input
+
+let run_string_parser p s = run_parser p (input_of_string s)
