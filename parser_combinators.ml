@@ -1,9 +1,3 @@
-(*
- * Simple monadic parser combinators library:
- *
- * Pure functional joy
- *)
-
 type string_input = {pos: int; string: string}
 
 type stream_input = {pos: int; buffer: Buffer.t; stream: char Stream.t}
