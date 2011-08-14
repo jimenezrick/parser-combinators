@@ -15,144 +15,91 @@ exception Error of string * input
 
 let input_of_string s = StringInput {pos = 0; string = s}
 
-let input_of_stream n s = StreamInput {pos = 0; buffer = Buffer.create n; stream = s}
+let input_of_stream n s =
+    StreamInput {pos = 0; buffer = Buffer.create n; stream = s}
 
 let input_of_lazy_list l = LazyListInput l
-
-
-
-
 
 let empty = function
     | StringInput input   -> empty_string input
     | StreamInput input   -> empty_stream input
     | LazyListInput input -> empty_lazy_list input
 
-let empty_string input =
-    String.length input.string = input.pos
+let empty_string input = String.length input.string = input.pos
 
 let empty_stream input =
-    Buffer.empty input.buffer && Stream.empty input.stream ||
-    Buffer.length input.buffer = input.pos && Stream.empty input.stream
+    empty_buffer input.buffer input.pos && Stream.empty input.stream
+and empty_buffer b p =
+    let len = Buffer.length b in
+    (len = 0 || len = p)
 
-let empty_lazy_list input =
-    Backpack.LazyList.force input = None
+let empty_lazy_list input = Backpack.LazyList.force input = None
 
+let peek = function
+    | StringInput input   -> peek_string input
+    | StreamInput input   -> peek_stream input
+    | LazyListInput input -> peek_lazy_list input
 
+let peek_string input =
+    if empty_string input then None
+    else Some (input.string.[input.pos], StringInput input)
 
+let peek_stream input =
+    let rec peek_stream' = function
+        | {pos = p; buffer = b; stream = s} as input when empty_buffer b p ->
+                let c = Stream.next s in
+                Buffer.add_char b c;
+                peek_stream' input
+        | {pos = p; buffer = b} as input ->
+                (Buffer.nth b p, StreamInput input)
+    in
+    if empty_stream input then None
+    else Some (peek_stream' input)
 
+let peek_lazy_list input =
+    match Backpack.LazyList.force input with
+    | None        -> None
+    | Some (c, _) -> Some (h, LazyListInput input)
 
-
-
-let peek input =
-    if empty input then None
-    else
-        match input with
-        | StringInput input   -> Some (peek_string input)
-        | StreamInput input   -> Some (peek_stream input)
-        | LazyListInput input -> Some (peek_lazy_list input)
-
-let peek_string input = (input.string.[input.pos], input)
-
-let peek_stream = function
-    | {buffer = b; stream = s} as input when Buffer.empty b ->
-            (* FIXME: Si se lee del Stream, lo metemos luego en el buffer! *)
-            let Some c = Stream.peek s in
-            (c, input)
-    | {buffer = b} as input ->
-            (Buffer.nth b 0, input)
-
-let peek_lazy_list l =
-    let Some (h, t) = Backpack.force l in
-    (h, l)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-let next input =
-    if empty input then None
-    else
-        match input with
-        | StringInput input   -> Some (next_string input)
-        | StreamInput input   -> Some (next_stream input)
-        | LazyListInput input -> Some (next_lazy_list input)
+let next = function
+    | StringInput input   -> next_string input
+    | StreamInput input   -> next_stream input
+    | LazyListInput input -> next_lazy_list input
 
 let next_string input =
-    match peek input with
-    | None            -> None
-    | Some (c, input) -> Some (c, {input with pos = input.pos + 1})
+    match peek_string input with
+    | None                        -> None
+    | Some (c, StringInput input) ->
+            Some (c, StringInput {input with pos = input.pos + 1})
 
+let next_stream input =
+    match peek_stream input with
+    | None                            -> None
+    | Some (c, StreamInput {pos = p}) ->
+            Some (c, StreamInput {input with pos = p + 1})
 
+let next_lazy_list input =
+    match Backpack.LazyList.force input with
+    | None             -> None
+    | Some (c, input') -> Some (c, LazyListInput input')
 
+let take n input =
+    let b = Buffer.create n in
+    while not (empty input) do
+        let Some (c, _) = next input in
+        Buffer.add_char b c
+    done;
+    Buffer.contents b
 
-
-(* TODO: miro aqui directamente si el Stream esta vacio??? *)
-let next_stream = function
-    let read_stream input =
-        let c = Stream.next input.stream in
-        (c, {input with pos = pos + 1; buffer = Buffer.add_char b})
-
-
-
-    | {buffer = b; stream = s} as input when Buffer.empty b ->
-            read_stream input
-
-
-    | {pos = p; buffer = b} as input when Buffer.length b = p ->
-            read_stream input
-
-
-    | {pos = p; buffer = b} as input ->
-            (Buffer.nth b p, {input with pos = pos + 1})
-
-
-
-
-
-
-
-
-
-(* TODO TODO TODO *)
-let next_lazy_list input = failwith "Not implemented"
-(* TODO TODO TODO *)
-
-
-
-
-
-
-
-
-
-
-
-
-(* FIXME FIXME: no usar directamente input.string *)
-(* FIXME FIXME: no usar directamente input.string *)
-(* FIXME FIXME: no usar directamente input.string *)
-let take_next_chars input n =
-    let len  = String.length input.string - input.pos in
-    if n > len
-    then String.sub input.string input.pos len
-    else String.sub input.string input.pos n
-(* FIXME FIXME FIXME *)
-(* FIXME FIXME FIXME *)
-(* FIXME FIXME FIXME *)
-
-
-
-
+let print_error info input =
+    let show_next_input =
+        if empty input
+        then "before EOF"
+        else "when parsing: \"" ^ take 10 input ^ "\""
+    in
+    prerr_string ("Parse error: expecting `" ^ info ^ "' " ^ show_next_input);
+    prerr_newline ();
+    None
 
 (* Applies parser to the input and takes the first result if there is any *)
 let parse p s =
@@ -160,16 +107,6 @@ let parse p s =
     | []          -> None
     | (x, _) :: _ -> Some x
 
-let print_error info input =
-    let next =
-        if empty input then "before EOF"
-        else "when parsing: \"" ^ take_next_chars input 10 ^ "\""
-    in
-    prerr_string ("Parse error: expecting `" ^ info ^ "' " ^ next);
-    prerr_newline ();
-    None
-
 let run_parser p s =
     try parse p s with
-    | Error (info, input) ->
-            print_error info input
+    | Error (info, input) -> print_error info input
