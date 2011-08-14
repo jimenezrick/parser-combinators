@@ -186,7 +186,7 @@ let () =
 
 (*
  * TODO TODO TODO
- * TODO TODO TODO: Continue with the rest of combinators
+ * TODO TODO TODO: Add test cases for the rest of combinators
  * TODO TODO TODO
  *)
 
