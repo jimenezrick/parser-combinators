@@ -7,7 +7,7 @@ OEXT=cmo
 #OEXT=cmx
 
 STD_DEPS=
-MODS=backpack.ml parser_combinators.ml
+MODS=backpack.ml parser.ml combinators.ml
 DEPS=$(MODS:.ml=.$(OEXT))
 
 TESTS_MODS=$(wildcard test/*.ml)
@@ -16,8 +16,7 @@ TESTS=$(TESTS_MODS:.ml=)
 
 .PHONY: all test clean
 
-all:
-	# TODO: Noting yet!
+all: $(DEPS)
 
 test: $(TESTS)
 	@export OCAMLRUNPARAM=b; for t in $?; do $$t; done
