@@ -1,4 +1,13 @@
-  Simple monadic parser combinators library
-=============================================
+  Monadic Parser Combinators
+==============================
 
+Simple monadic parser combinators library for OCaml.
 Pure functional joy.
+
+
+ Inspired by
+-------------
+
+- Monadic parser combinators, Graham Hutton and Erik Meijer
+- PCL: Parsec-style parsers for OCaml
+- Parsec Haskell library
