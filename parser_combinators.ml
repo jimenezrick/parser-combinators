@@ -4,7 +4,7 @@
  * Pure functional joy
  *)
 
-type input = {cursor: int; text: string}
+type input = {pos: int; string: string}
 
 type 'a parser = input -> ('a * input) list
 
@@ -17,14 +17,18 @@ exception Error of string * input
 
 (*
 
-type string_input = {cursor: int; string: string}
+type string_input = {pos: int; string: string}
 
-type stream_input = {cursor: int; buffer: Buffer.t; stream: Stream.t}
+type stream_input = {pos: int; buffer: Buffer.t; stream: char Stream.t}
 
+
+
+(*
 type input =
     | StringInput of string_input
     | StreamInput of stream_input
     | LazyListInput of
+*)
 
 
 
@@ -36,23 +40,23 @@ type input =
 
 
 
-let input_of_string s = {cursor = 0; text = s}
+let input_of_string s = {pos = 0; string = s}
 
 let empty input =
-    let len = String.length input.text in
+    let len = String.length input.string in
     match input with
-    | {cursor = l} when l = len -> true
-    | _                         -> false
+    | {pos = l} when l = len -> true
+    | _                      -> false
 
 let peek input =
     if empty input
     then None
-    else Some (input.text.[input.cursor], input)
+    else Some (input.string.[input.pos], input)
 
 let next input =
     match peek input with
     | None            -> None
-    | Some (c, input) -> Some (c, {input with cursor = input.cursor + 1})
+    | Some (c, input) -> Some (c, {input with pos = input.pos + 1})
 
 let scan =
     fun input ->
@@ -246,14 +250,14 @@ let arith_op =
 
 
 
-(* FIXME FIXME: no usar directamente input.text *)
-(* FIXME FIXME: no usar directamente input.text *)
-(* FIXME FIXME: no usar directamente input.text *)
+(* FIXME FIXME: no usar directamente input.string *)
+(* FIXME FIXME: no usar directamente input.string *)
+(* FIXME FIXME: no usar directamente input.string *)
 let take_next_chars input n =
-    let len  = String.length input.text - input.cursor in
+    let len  = String.length input.string - input.pos in
     if n > len
-    then String.sub input.text input.cursor len
-    else String.sub input.text input.cursor n
+    then String.sub input.string input.pos len
+    else String.sub input.string input.pos n
 (* FIXME FIXME FIXME *)
 (* FIXME FIXME FIXME *)
 (* FIXME FIXME FIXME *)
