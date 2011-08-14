@@ -24,9 +24,7 @@ let empty_string input = String.length input.string = input.pos
 
 let rec empty_stream input =
     empty_buffer input.buffer input.spos && empty_stream' input.stream
-and empty_buffer b p =
-    let len = Buffer.length b in
-    (len = 0 || len = p)
+and empty_buffer b p = Buffer.length b = 0 || Buffer.length b = p
 and empty_stream' s =
     try Stream.empty s = () with
     | Stream.Failure -> false
@@ -44,11 +42,11 @@ let peek_string input =
 
 let peek_stream input =
     let rec peek_stream' = function
-        | {spos = p; buffer = b; stream = s} as input when empty_buffer b p ->
+        | {spos = p; buffer = b; stream = s} when empty_buffer b p ->
                 let c = Stream.next s in
                 Buffer.add_char b c;
                 peek_stream' input
-        | {spos = p; buffer = b} as input ->
+        | {spos = p; buffer = b} ->
                 (Buffer.nth b p, StreamInput input)
     in
     if empty_stream input then None
