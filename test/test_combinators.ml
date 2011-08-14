@@ -1,7 +1,7 @@
-open Parser_combinators
+open Combinators
 
 let run_test p s =
-    match run_parser p s with
+    match Parser.run_parser p s with
     | None   -> assert false
     | Some s -> Backpack.Str.implode s
 
@@ -9,7 +9,7 @@ let () =
     let p = ( >>? ) (+) integer integer in
     let s = "1-2" in
     let r = Some (-1) in
-    assert (r = run_parser p s)
+    assert (r = Parser.run_parser p s)
 
 let () =
     let p = ((char '-' >>:: nat) <|> neg) >>@ word in
@@ -104,10 +104,10 @@ let () =
     let r2 = Some 0 in
     let r3 = Some 1 in
     let r4 = Some 3 in
-    assert (r1 = run_parser p s1);
-    assert (r2 = run_parser p s2);
-    assert (r3 = run_parser p s3);
-    assert (r4 = run_parser p s4)
+    assert (r1 = Parser.run_parser p s1);
+    assert (r2 = Parser.run_parser p s2);
+    assert (r3 = Parser.run_parser p s3);
+    assert (r4 = Parser.run_parser p s4)
 
 let () =
     let p  = chainr1 integer arith_op in
@@ -119,10 +119,10 @@ let () =
     let r2 = Some 0 in
     let r3 = Some 1 in
     let r4 = Some 5 in
-    assert (r1 = run_parser p s1);
-    assert (r2 = run_parser p s2);
-    assert (r3 = run_parser p s3);
-    assert (r4 = run_parser p s4)
+    assert (r1 = Parser.run_parser p s1);
+    assert (r2 = Parser.run_parser p s2);
+    assert (r3 = Parser.run_parser p s3);
+    assert (r4 = Parser.run_parser p s4)
 
 let () =
     let p  = chainl integer arith_op 0 in
@@ -130,8 +130,8 @@ let () =
     let s2 = "-1+2*3" in
     let r1 = Some 0 in
     let r2 = Some 3 in
-    assert (r1 = run_parser p s1);
-    assert (r2 = run_parser p s2)
+    assert (r1 = Parser.run_parser p s1);
+    assert (r2 = Parser.run_parser p s2)
 
 let () =
     let p  = chainr integer arith_op 0 in
@@ -139,8 +139,8 @@ let () =
     let s2 = "-1+2*3" in
     let r1 = Some 0 in
     let r2 = Some 5 in
-    assert (r1 = run_parser p s1);
-    assert (r2 = run_parser p s2)
+    assert (r1 = Parser.run_parser p s1);
+    assert (r2 = Parser.run_parser p s2)
 
 let () =
     let p = choice [string "x"; nat] in
