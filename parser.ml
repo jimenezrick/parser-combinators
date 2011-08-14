@@ -69,12 +69,14 @@ let next_string input =
     | None                        -> None
     | Some (c, StringInput input) ->
             Some (c, StringInput {input with pos = input.pos + 1})
+    | _ -> invalid_arg "next_string"
 
 let next_stream input =
     match peek_stream input with
     | None                             -> None
     | Some (c, StreamInput {spos = p}) ->
             Some (c, StreamInput {input with spos = p + 1})
+    | _ -> invalid_arg "next_stream"
 
 let next_lazy_list input =
     match Backpack.LazyList.force input with
