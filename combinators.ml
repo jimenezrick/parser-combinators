@@ -42,7 +42,7 @@ let ( ||| ) p q =
 (* Non-deterministic alternative operator, tries all possibilities *)
 let ( <|> ) p q = fun input -> p input @ q input
 
-let ( <?> ) p info = p ||| fun input -> raise (Error (info, input))
+let ( <?> ) p info = p ||| fun input -> raise (Parser.Error (info, input))
 
 let rec many p =
     let continue =
@@ -174,7 +174,7 @@ let symbol s = token (string s)
 
 let eof =
     fun input ->
-        if empty input
+        if Parser.empty input
         then mzero input
         else fail input
 
