@@ -15,25 +15,28 @@ exception Error of string * input
 
 
 
-(*
 
+
+
+(**)
 type string_input = {pos: int; string: string}
 
 type stream_input = {pos: int; buffer: Buffer.t; stream: char Stream.t}
 
+type lazy_list_input = char Backpack.LazyList.t
 
-
-(*
 type input =
     | StringInput of string_input
     | StreamInput of stream_input
-    | LazyListInput of
-*)
+    | LazyListInput of lazy_list_input
+
+type 'a parser = input -> ('a * input) list
+
+exception Error of string * input
+(**)
 
 
 
-
-*)
 
 
 
