@@ -117,4 +117,11 @@ module LazyList =
                 | Nil         -> Nil
                 | Cons (h, t) -> Cons (f h, lazy (next f t))
             in lazy (next f l)
+
+        let append l1 l2 =
+            let rec next l1 l2 =
+                match Lazy.force l1 with
+                | Nil         -> l2
+                | Cons (h, t) -> Cons (h, lazy (next t l2))
+            in lazy (next l1 l2)
     end
