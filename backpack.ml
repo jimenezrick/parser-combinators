@@ -111,10 +111,10 @@ module LazyList =
             | Nil         -> None
             | Cons (h, t) -> Some (h, t)
 
-        let rec map f l =
-            let map' () =
+        let map f l =
+            let rec next f l =
                 match Lazy.force l with
                 | Nil         -> Nil
-                | Cons (h, t) -> Cons (f h, map f t)
-            in lazy (map' ())
+                | Cons (h, t) -> Cons (f h, lazy (next f t))
+            in lazy (next f l)
     end
