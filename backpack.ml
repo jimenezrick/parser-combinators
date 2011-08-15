@@ -86,11 +86,12 @@ module LazyList =
                 | Some x -> Cons (x, lazy (next (n + 1)))
             in lazy (next 0)
 
-        let of_list l =
-            let rec next = function
+        let rec of_list l =
+            lazy (
+                match l with
                 | []      -> Nil
-                | x :: xs -> Cons (x, lazy (next xs))
-            in lazy (next l)
+                | x :: xs -> Cons (x, of_list xs)
+            )
 
         let of_string s =
             let rec next n =
@@ -98,21 +99,11 @@ module LazyList =
                 | Invalid_argument _ -> Nil
             in lazy (next 0)
 
-
-
-
-
-
         let rec of_stream s =
             lazy (
                 try Cons (Stream.next s, of_stream s) with
                 | Stream.Failure -> Nil
             )
-
-
-
-
-
 
         let of_channel c = of_stream (Stream.of_channel c)
 
