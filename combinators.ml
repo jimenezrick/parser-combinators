@@ -112,7 +112,7 @@ let end_by p sep = many (p >>= fun x -> sep >> return x)
 
 let end_by1 p sep = many1 (p >>= fun x -> sep >> return x)
 
-let many_till p until = many p >>:: drop until
+let many_till p until = many p >>@ drop until
 
 let not_followed_by p =
     let pred_not p =

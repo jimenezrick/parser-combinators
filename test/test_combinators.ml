@@ -183,9 +183,11 @@ let () =
     let r = "123" in
     assert (r = run_test p s)
 
-
-(* XXX many_till XXX *)
-
+let () =
+    let p = drop (string "/*") >> many_till any (string "*/") in
+    let s = "/* 123 */" in
+    let r = " 123 " in
+    assert (r = run_test p s)
 
 let () =
     let p = many1 any >>@ not_followed_by (( = ) ';') in
