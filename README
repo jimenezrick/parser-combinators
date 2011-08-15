@@ -1,13 +1,24 @@
   Monadic Parser Combinators
 ==============================
 
-Simple monadic parser combinators library for OCaml.
+  Simple monadic parser combinators library for OCaml.
 Pure functional joy.
 
 
- Inspired by
+ Inspired By
 -------------
 
-- Monadic Parser Combinators, Graham Hutton and Erik Meijer
-- pcl: Parsec-style parsers for OCaml
-- Parsec Haskell library
+- Monadic Parser Combinators, Graham Hutton and Erik Meijer.
+- pcl: Parsec-style parsers for OCaml.
+- Parsec Haskell library.
+
+
+  Description
+---------------
+
+  Top-down parser which handles an internal lazy list with all the
+possible applications of the parser to the input that makes possible to
+backtrack when necessary.
+
+  The parser can take as input: functions, strings, lists, streams and
+channels.
