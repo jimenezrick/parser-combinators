@@ -1,24 +1,27 @@
+open Backpack
+
 let scan =
     fun input ->
         match Parser.peek input with
-        | None   -> []
-        | Some x -> [x]
+        | None   -> LazyList.create_empty ()
+        | Some x -> LazyList.create x
 
 let item =
     fun input ->
         match Parser.next input with
-        | None   -> []
-        | Some x -> [x]
+        | None   -> LazyList.create_empty ()
+        | Some x -> LazyList.create x
 
-let return x = fun input -> [(x, input)]
+let return x = fun input -> LazyList.create (x, input)
 
-let fail = fun input -> []
+let fail = fun input -> LazyList.create_empty ()
 
 let mzero = return []
 
 let ( >>= ) p f =
+    let f' = fun (x, input') -> f x input' in
     fun input ->
-        List.concat (List.map (fun (x, input') -> f x input') (p input))
+        LazyList.concat (LazyList.map f' (p input))
 
 let ( >> ) p q = p >>= fun _ -> q
 
@@ -33,36 +36,36 @@ let ( >>:: ) p q =
 
 let ( >>@ ) p q = ( >>? ) ( @ ) p q
 
+(* Non-deterministic alternative operator, tries all possibilities *)
+let ( ||| ) p q = fun input -> LazyList.append (p input) (q input)
+
 (* Deterministic alternative operator, tries right only if left fails *)
 let ( <|> ) p q =
     fun input ->
-        match p input with
-        | [] -> q input
-        | x  -> x
+        match Lazy.force (p input) with
+        | LazyList.Nil         -> q input
+        | LazyList.Cons (h, t) -> lazy (LazyList.Cons (h, t))
 
-(* Non-deterministic alternative operator, tries all possibilities *)
-let ( ||| ) p q = fun input -> p input @ q input
-
-let ( <?> ) p info = p <|> fun input -> raise (Parser.Error (info, input))
+let ( <?> ) p info = p ||| fun input -> raise (Parser.Error (info, input))
 
 let rec many p =
     let continue =
         p      >>= fun x  ->
         many p >>= fun xs ->
         return (x :: xs)
-    in continue <|> mzero
+    in continue ||| mzero
 
 let many1 p = p >>:: many p
 
-let opt p = p <|> mzero
+let opt p = p ||| mzero
 
 let drop p = p >> mzero
 
-let drop_opt p = drop p <|> mzero
+let drop_opt p = drop p ||| mzero
 
 let sep_by1 p sep = p >>:: many (drop sep >> p)
 
-let sep_by p sep = sep_by1 p sep <|> mzero
+let sep_by p sep = sep_by1 p sep ||| mzero
 
 let between o p c = drop o >>@ p >>@ drop c
 
@@ -70,28 +73,28 @@ let chainl1 p op =
     let rec rest x =
         (op >>= fun f ->
          p  >>= fun y ->
-         rest (f x y)) <|> return x
+         rest (f x y)) ||| return x
     in p >>= rest
 
 let rec chainr1 p op =
     let rest x =
         (op           >>= fun f ->
          chainr1 p op >>= fun y ->
-         return (f x y)) <|> return x
+         return (f x y)) ||| return x
     in p >>= rest
 
-let chainl p op x = chainl1 p op <|> return x
+let chainl p op x = chainl1 p op ||| return x
 
-let chainr p op x = chainr1 p op <|> return x
+let chainr p op x = chainr1 p op ||| return x
 
-let choice ps = List.fold_right ( <|> ) ps mzero
+let choice ps = List.fold_right ( ||| ) ps mzero
 
-let choice1 ps = List.fold_right ( <|> ) ps mzero
+let choice1 ps = List.fold_right ( ||| ) ps mzero
 
 (*
  * If `skip_many' were defined as:
  *
- *     let rec skip_many p = p >> skip_many p <|> mzero
+ *     let rec skip_many p = p >> skip_many p ||| mzero
  *
  * It would cause an infinite loop because first `p' is evaluated, then
  * `skip_many p' and finally `>>'. So if `p' fails, `skip_many p' is evaluated
@@ -137,23 +140,23 @@ let lower = pred (fun c -> 'a' <= c && c <= 'z')
 
 let upper = pred (fun c -> 'A' <= c && c <= 'Z')
 
-let letter = lower <|> upper
+let letter = lower ||| upper
 
-let alphanum = letter <|> digit
+let alphanum = letter ||| digit
 
-let word = many1 (alphanum <|> char '_')
+let word = many1 (alphanum ||| char '_')
 
 let nat = many1 digit
 
 let neg = char '-' >>:: nat
 
-let int = neg <|> nat
+let int = neg ||| nat
 
-let space = (char ' ' <|> char '\t') >>:: mzero
+let space = (char ' ' ||| char '\t') >>:: mzero
 
-let eol = (char '\n' >>:: mzero) <|> (char '\r' >>:: (char '\n' >>:: mzero))
+let eol = (char '\n' >>:: mzero) ||| (char '\r' >>:: (char '\n' >>:: mzero))
 
-let sep = space <|> eol
+let sep = space ||| eol
 
 let junk = many sep
 
@@ -167,7 +170,7 @@ let natural = integer_of_token nat
 
 let negative = integer_of_token neg
 
-let integer = negative <|> natural
+let integer = negative ||| natural
 
 let string s =
     let rec string' = function
@@ -186,7 +189,7 @@ let eof =
 let junk_eof = junk >> eof
 
 let arith_op =
-    (char '+' >> return ( + )) <|>
-    (char '-' >> return ( - )) <|>
-    (char '*' >> return ( * )) <|>
+    (char '+' >> return ( + )) |||
+    (char '-' >> return ( - )) |||
+    (char '*' >> return ( * )) |||
     (char '/' >> return ( / ))

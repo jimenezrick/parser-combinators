@@ -1,15 +1,17 @@
+open Backpack
+
 type string_input = {pos: int; string: string}
 
 type stream_input = {spos: int; buffer: Buffer.t; stream: char Stream.t}
 
-type lazy_list_input = char Backpack.LazyList.t
+type lazy_list_input = char LazyList.t
 
 type input =
     | StringInput of string_input
     | StreamInput of stream_input
     | LazyListInput of lazy_list_input
 
-type 'a t = input -> ('a * input) list
+type 'a t = input -> ('a * input) LazyList.t
 
 exception Error of string * input
 
@@ -29,7 +31,7 @@ and empty_stream' s =
     try Stream.empty s = () with
     | Stream.Failure -> false
 
-let empty_lazy_list input = Backpack.LazyList.force input = None
+let empty_lazy_list input = Lazy.force input = LazyList.Nil
 
 let empty = function
     | StringInput input   -> empty_string input
@@ -53,9 +55,9 @@ let peek_stream input =
     else Some (peek_stream' input)
 
 let peek_lazy_list input =
-    match Backpack.LazyList.force input with
-    | None        -> None
-    | Some (c, _) -> Some (c, LazyListInput input)
+    match Lazy.force input with
+    | LazyList.Nil         -> None
+    | LazyList.Cons (c, _) -> Some (c, LazyListInput input)
 
 let peek = function
     | StringInput input   -> peek_string input
@@ -77,9 +79,9 @@ let next_stream input =
     | _ -> invalid_arg "Parser.next_stream"
 
 let next_lazy_list input =
-    match Backpack.LazyList.force input with
-    | None             -> None
-    | Some (c, input') -> Some (c, LazyListInput input')
+    match Lazy.force input with
+    | LazyList.Nil              -> None
+    | LazyList.Cons (c, input') -> Some (c, LazyListInput input')
 
 let next = function
     | StringInput input   -> next_string input
@@ -105,19 +107,20 @@ let print_error info input =
         else "when parsing: \"" ^ take 10 input ^ "\""
     in
     prerr_string ("Parse error: expecting `" ^ info ^ "' " ^ next_input);
-    prerr_newline ();
-    None
+    prerr_newline ()
 
 (* Applies parser to the input and takes the first result if there is any *)
 let parse p s =
-    match p s with
-    | []          -> None
-    | (x, _) :: _ -> Some x
+    match Lazy.force (p s) with
+    | LazyList.Nil              -> None
+    | LazyList.Cons ((x, _), _) -> Some x
 
 let parse_string p s = parse p (input_of_string s)
 
 let run_parser p s =
     try parse p s with
-    | Error (info, input) -> print_error info input
+    | Error (info, input) ->
+            print_error info input;
+            None
 
 let run_string_parser p s = run_parser p (input_of_string s)
