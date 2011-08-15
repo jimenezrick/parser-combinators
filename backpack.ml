@@ -98,30 +98,46 @@ module LazyList =
                 | Invalid_argument _ -> Nil
             in lazy (next 0)
 
-        let of_stream s =
-            let rec next () =
-                try Cons (Stream.next s, lazy (next ())) with
+
+
+
+
+
+        let rec of_stream s =
+            lazy (
+                try Cons (Stream.next s, of_stream s) with
                 | Stream.Failure -> Nil
-            in lazy (next ())
+            )
+
+
+
+
+
 
         let of_channel c = of_stream (Stream.of_channel c)
 
-        let force l =
-            match Lazy.force l with
-            | Nil         -> None
-            | Cons (h, t) -> Some (h, t)
-
-        let map f l =
-            let rec next f l =
+        let rec map f l =
+            lazy (
                 match Lazy.force l with
                 | Nil         -> Nil
-                | Cons (h, t) -> Cons (f h, lazy (next f t))
-            in lazy (next f l)
+                | Cons (h, t) -> Cons (f h, map f t)
+            )
 
-        let append l1 l2 =
-            let rec next l1 l2 =
+        let rec append l1 l2 =
+            lazy (
                 match Lazy.force l1 with
-                | Nil         -> l2
-                | Cons (h, t) -> Cons (h, lazy (next t l2))
-            in lazy (next l1 l2)
+                | Nil         -> Lazy.force l2
+                | Cons (h, t) -> Cons (h, append t l2)
+            )
+
+        let rec concat ll =
+            lazy (
+                match Lazy.force ll with
+                | Nil          -> Nil
+                | Cons (l, ls) -> Lazy.force (append l (concat ls))
+            )
+
+        let create_empty () = lazy Nil
+
+        let create x = lazy (Cons (x, lazy Nil))
     end
