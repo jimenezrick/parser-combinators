@@ -1,0 +1,21 @@
+  El combinator not_followed_by falla porque no está implementado el backtraing
+y como se usa el operador <|>, este siempre elige la primera opción y continúa
+siempre en profundidad, nunca se devuelve una lista de los posibles parser
+resultado.
+
+  Para solucionarlo se podría usar el operador ||| en todos los lugares, ya que
+éste desarrolla todas las posibilidades pero ésto seríá muy costoso.
+
+  Una posible solución es usar en todos sitios el operador |||, pero primero
+modificar el tipo Parser.t para que sea una lista *lazy* de resultados. Así
+solo se desarrolla ésta si hace falta.
+
+  Construiriamos la lista lazy en el operador alternativa |||, desarrollado
+todas las posibilidades, pero lo dejaríamos dentro de una construcción `lazy'.
+
+  El operador >>= es el encargado de forzar el lazy si hace falta, dejando los
+map's también en estado lazy cuando no haga falta.
+
+  *** Por tanto, dejar de usar <|> y usar ||| en todos sitios. El operador
+||| construye una lista lazy. El operador >>= hace map's lazy y hace
+Lazy.force cuando hace falta. ***
