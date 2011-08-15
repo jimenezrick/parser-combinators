@@ -110,7 +110,11 @@ let end_by1 p sep = many1 (p >>= fun x -> sep >> return x)
 
 let many_till p until = many p >>:: drop until
 
-let not_followed_by p not_q = (not_q >> fail) ||| p
+let not_followed_by p =
+    let pred_not p =
+        scan >>= fun x ->
+            if not (p x) then return x else fail
+    in drop (pred_not p)
 
 let rec count n p =
     match n with
@@ -124,7 +128,7 @@ let pred p =
 
 let any = pred (fun _ -> true)
 
-let char c = pred (fun c' -> c = c')
+let char c = pred (( = ) c)
 
 let digit = pred (fun c -> '0' <= c && c <= '9')
 
