@@ -1,5 +1,6 @@
 .*.swp
 *.cm*
 *.o
+*.mli
 test/test*
 !test/test*.ml
