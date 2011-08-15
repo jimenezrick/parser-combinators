@@ -184,18 +184,14 @@ let () =
     assert (r = run_test p s)
 
 
-
 (* XXX many_till XXX *)
 
 
-
-(*
 let () =
     let p = many1 any >>@ not_followed_by (( = ) ';') in
     let s = "AB6;" in
     let r = "AB" in
     assert (r = run_test p s)
-*)
 
 
 
@@ -219,5 +215,5 @@ let () =
 
 
 let () =
-    print_string "All tests passed";
+    print_string "*** All tests passed ***";
     print_newline ()

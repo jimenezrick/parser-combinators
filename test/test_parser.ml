@@ -25,5 +25,5 @@ let () =
     List.iter (fun i -> test_input i s) [input1; input2; input3]
 
 let () =
-    print_string "All tests passed";
+    print_string "*** All tests passed ***";
     print_newline ()
