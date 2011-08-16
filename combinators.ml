@@ -36,17 +36,36 @@ let ( >>:: ) p q =
 
 let ( >>@ ) p q = ( >>? ) ( @ ) p q
 
+(*
+ * This expression:
+ *
+ *     (p >>:: (q >>:: r))
+ *
+ * Can be simplified to:
+ *
+ *     p ^>>:: q ^>>:: r
+ *
+ * This is why the next operators may result handy.
+ *)
+
+(* `^>>::' is right associative, whereas `>>::' is left associative *)
+let ( ^>>:: ) = ( >>:: )
+
+(* `^>>@' is right associative, whereas `>>@' is left associative *)
+let ( ^>>@ ) = ( >>@ )
+
 (* Non-deterministic alternative operator, tries all possibilities *)
 let ( ||| ) p q = fun input -> LazyList.append (p input) (q input)
 
-(* Deterministic alternative operator, tries right only if left fails *)
+(* Deterministic alternative operator, tries `q' only if `p' fails *)
 let ( <|> ) p q =
     fun input ->
         match Lazy.force (p input) with
         | LazyList.Nil         -> q input
         | LazyList.Cons (h, t) -> lazy (LazyList.Cons (h, t))
 
-let ( <?> ) p info = p ||| fun input -> raise (Parser.Error (info, input))
+(* Help operator, if `p' fails then raises an error with some embedded info *)
+let ( <?> ) p info = p <|> fun input -> raise (Parser.Error (info, input))
 
 let rec many p =
     let continue =
@@ -67,7 +86,7 @@ let sep_by1 p sep = p >>:: many (drop sep >> p)
 
 let sep_by p sep = sep_by1 p sep ||| mzero
 
-let between o p c = drop o >>@ p >>@ drop c
+let between o p c = drop o >> p >>@ drop c
 
 let chainl1 p op =
     let rec rest x =
@@ -152,18 +171,18 @@ let neg = char '-' >>:: nat
 
 let int = neg ||| nat
 
-let space = (char ' ' ||| char '\t') >>:: mzero
+let space = char ' ' ||| char '\t' ||| char '\r'
 
-let eol = (char '\n' >>:: mzero) ||| (char '\r' >>:: (char '\n' >>:: mzero))
+let eol = char '\n'
 
 let sep = space ||| eol
 
-let junk = many sep
+let junk = drop (many sep)
 
-let token p = junk >> p
+let token p = p >>@ junk
 
 let integer_of_token p =
-    p >>= fun x ->
+    token p >>= fun x ->
     return (int_of_string (Backpack.Str.implode x))
 
 let natural = integer_of_token nat
@@ -178,7 +197,7 @@ let string s =
         | c :: cs -> char c >>:: string' cs
     in string' (Backpack.Str.explode s)
 
-let symbol s = token (string s)
+let keyword s = token (string s)
 
 let eof =
     fun input ->
@@ -187,6 +206,8 @@ let eof =
         else fail input
 
 let junk_eof = junk >> eof
+
+let junk_start p = junk >> p
 
 let arith_op =
     (char '+' >> return ( + )) |||
