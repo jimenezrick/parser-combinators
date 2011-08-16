@@ -234,5 +234,11 @@ let () =
     assert (r = run_test p s)
 
 let () =
+    let p = many1 integer in
+    let s = "1  2   3" in
+    let r = Some [1; 2; 3] in
+    assert (r = Parser.run_string_parser p s)
+
+let () =
     print_string "*** All tests passed ***";
     print_newline ()
