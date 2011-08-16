@@ -7,7 +7,7 @@ let run_test p s =
 
 let () =
     let p = ( >>? ) (+) integer integer in
-    let s = "1-2" in
+    let s = "1   -2" in
     let r = Some (-1) in
     assert (r = Parser.run_string_parser p s)
 
@@ -97,9 +97,9 @@ let () =
 let () =
     let p  = chainl1 integer arith_op in
     let s1 = "1" in
-    let s2 = "1+2-3" in
+    let s2 = "1  +2  -3" in
     let s3 = "-1+2" in
-    let s4 = "-1+2*3" in
+    let s4 = "-1  +2*3" in
     let r1 = Some 1 in
     let r2 = Some 0 in
     let r3 = Some 1 in
@@ -113,7 +113,7 @@ let () =
     let p  = chainr1 integer arith_op in
     let s1 = "1" in
     let s2 = "1+2-3" in
-    let s3 = "-1+2" in
+    let s3 = "-1  +2" in
     let s4 = "-1+2*3" in
     let r1 = Some 1 in
     let r2 = Some 0 in
@@ -201,29 +201,37 @@ let () =
     let r = "123" in
     assert (r = run_test p s)
 
+let () =
+    let p = token nat >>@ token neg in
+    let s = "123  -456" in
+    let r = "123-456" in
+    assert (r = run_test p s)
 
+let () =
+    let p = token nat >>@ return [';'] >>@ many any >>@ token neg in
+    let s = "123-456" in
+    let r = "123;-456" in
+    assert (r = run_test p s)
 
+let () =
+    let p = keyword "var" >>@ word in
+    let s = "var  i" in
+    let r = "vari" in
+    assert (r = run_test p s)
 
+let () =
+    let p = (char '1' >>:: eof) ||| (char '1' ^>>:: char '2' ^>>:: eof) in
+    let s = "12" in
+    let r = "12" in
+    assert (r = run_test p s)
 
-
-
-
-
-
-(*
- * TODO TODO TODO
- * TODO TODO TODO: Add test cases for the rest of combinators
- * TODO TODO TODO
- *)
-
-
-(*
 let () =
     let p =
-    let s =
-    assert (s = run_test p s)
-*)
-
+        junk_start ((keyword "foo" >>@ junk_eof) |||
+                    (keyword "foo" >>@ keyword "bar" >>@ junk_eof)) in
+    let s = "   foo   bar   " in
+    let r = "foobar" in
+    assert (r = run_test p s)
 
 let () =
     print_string "*** All tests passed ***";
