@@ -195,6 +195,15 @@ let () =
     let r = "AB" in
     assert (r = run_test p s)
 
+let () =
+    let p = count 3 digit in
+    let s = "1234" in
+    let r = "123" in
+    assert (r = run_test p s)
+
+
+
+
 
 
 
