@@ -164,7 +164,7 @@ let letter = lower ||| upper
 
 let alphanum = letter ||| digit
 
-let word = many1 (alphanum ||| char '_')
+let word' = many1 (alphanum ||| char '_')
 
 let nat = many1 digit
 
@@ -181,6 +181,8 @@ let sep = space ||| eol
 let junk = drop (many sep)
 
 let token p = p >>@ junk
+
+let word = token word'
 
 let integer_of_token p =
     token p >>= fun x ->

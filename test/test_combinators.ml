@@ -12,7 +12,7 @@ let () =
     assert (r = Parser.run_string_parser p s)
 
 let () =
-    let p = ((char '-' >>:: nat) <|> neg) >>@ word in
+    let p = ((char '-' >>:: nat) <|> neg) >>@ word' in
     let s = "-123word" in
     assert (s = run_test p s)
 
@@ -33,7 +33,7 @@ let () =
     assert (s2 = run_test p s2)
 
 let () =
-    let p  = opt nat >>@ word in
+    let p  = opt nat >>@ word' in
     let s1 = "123abc" in
     let s2 = "abc" in
     assert (s1 = run_test p s1);
@@ -196,6 +196,23 @@ let () =
     assert (r = run_test p s)
 
 let () =
+    let p = junk >> many word >>@ (keyword "end" >>:: mzero) in
+    let s = "  1  2   3  end" in
+    let r = ["1"; "2"; "3"; "end"] in
+    assert (Some (List.map Backpack.Str.explode r) = Parser.run_string_parser p s)
+
+
+
+
+
+
+
+
+
+
+
+
+let () =
     let p = count 3 digit in
     let s = "1234" in
     let r = "123" in
@@ -214,7 +231,7 @@ let () =
     assert (r = run_test p s)
 
 let () =
-    let p = keyword "var" >>@ word in
+    let p = keyword "var" >>@ word' in
     let s = "var  i" in
     let r = "vari" in
     assert (r = run_test p s)
