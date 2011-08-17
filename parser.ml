@@ -31,7 +31,7 @@ and empty_stream' s =
     try Stream.empty s = () with
     | Stream.Failure -> false
 
-let empty_lazy_list input = Lazy.force input = LazyList.Nil
+let empty_lazy_list input = LazyList.force input = LazyList.Nil
 
 let empty = function
     | StringInput input   -> empty_string input
@@ -55,7 +55,7 @@ let peek_stream input =
     else Some (peek_stream' input)
 
 let peek_lazy_list input =
-    match Lazy.force input with
+    match LazyList.force input with
     | LazyList.Nil         -> None
     | LazyList.Cons (c, _) -> Some (c, LazyListInput input)
 
@@ -79,7 +79,7 @@ let next_stream input =
     | _ -> invalid_arg "Parser.next_stream"
 
 let next_lazy_list input =
-    match Lazy.force input with
+    match LazyList.force input with
     | LazyList.Nil              -> None
     | LazyList.Cons (c, input') -> Some (c, LazyListInput input')
 
@@ -111,7 +111,7 @@ let print_error info input =
 
 (* Applies parser to the input and takes the first result if there is any *)
 let parse p s =
-    match Lazy.force (p s) with
+    match LazyList.force (p s) with
     | LazyList.Nil              -> None
     | LazyList.Cons ((x, _), _) -> Some x
 

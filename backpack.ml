@@ -79,6 +79,35 @@ module LazyList =
             | Cons of 'a * 'a t
         and 'a t = 'a node Lazy.t
 
+        let empty = lazy Nil
+
+        let create x = lazy (Cons (x, lazy Nil))
+
+        let cons h t = lazy (Cons (h, t))
+
+        let force = Lazy.force
+
+        let rec map f l =
+            lazy (
+                match force l with
+                | Nil         -> Nil
+                | Cons (h, t) -> Cons (f h, map f t)
+            )
+
+        let rec append l1 l2 =
+            lazy (
+                match force l1 with
+                | Nil         -> force l2
+                | Cons (h, t) -> Cons (h, append t l2)
+            )
+
+        let rec concat ll =
+            lazy (
+                match force ll with
+                | Nil          -> Nil
+                | Cons (l, ls) -> force (append l (concat ls))
+            )
+
         let from f =
             let rec next n =
                 match f n with
@@ -106,29 +135,4 @@ module LazyList =
             )
 
         let of_channel c = of_stream (Stream.of_channel c)
-
-        let rec map f l =
-            lazy (
-                match Lazy.force l with
-                | Nil         -> Nil
-                | Cons (h, t) -> Cons (f h, map f t)
-            )
-
-        let rec append l1 l2 =
-            lazy (
-                match Lazy.force l1 with
-                | Nil         -> Lazy.force l2
-                | Cons (h, t) -> Cons (h, append t l2)
-            )
-
-        let rec concat ll =
-            lazy (
-                match Lazy.force ll with
-                | Nil          -> Nil
-                | Cons (l, ls) -> Lazy.force (append l (concat ls))
-            )
-
-        let create_empty () = lazy Nil
-
-        let create x = lazy (Cons (x, lazy Nil))
     end

@@ -3,18 +3,18 @@ open Backpack
 let scan =
     fun input ->
         match Parser.peek input with
-        | None   -> LazyList.create_empty ()
+        | None   -> LazyList.empty
         | Some x -> LazyList.create x
 
 let item =
     fun input ->
         match Parser.next input with
-        | None   -> LazyList.create_empty ()
+        | None   -> LazyList.empty
         | Some x -> LazyList.create x
 
 let return x = fun input -> LazyList.create (x, input)
 
-let fail = fun input -> LazyList.create_empty ()
+let fail = fun input -> LazyList.empty
 
 let mzero = return []
 
@@ -60,9 +60,10 @@ let ( ||| ) p q = fun input -> LazyList.append (p input) (q input)
 (* Deterministic alternative operator, tries `q' only if `p' fails *)
 let ( <|> ) p q =
     fun input ->
-        match Lazy.force (p input) with
-        | LazyList.Nil         -> q input
-        | LazyList.Cons (h, t) -> lazy (LazyList.Cons (h, t))
+        let res = p input in
+        if LazyList.force res = LazyList.Nil
+        then q input
+        else res
 
 (* Help operator, if `p' fails then raises an error with some embedded info *)
 let ( <?> ) p info = p <|> fun input -> raise (Parser.Error (info, input))
