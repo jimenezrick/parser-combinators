@@ -1,11 +1,5 @@
 open Backpack
 
-let scan =
-    fun input ->
-        match Parser.peek input with
-        | None   -> LazyList.empty
-        | Some x -> LazyList.create x
-
 let item =
     fun input ->
         match Parser.next input with
@@ -67,6 +61,12 @@ let ( <|> ) p q =
 
 (* Help operator, if `p' fails then raises an error with some embedded info *)
 let ( <?> ) p info = p <|> fun input -> raise (Parser.Error (info, input))
+
+let return_input x input = fun _ -> LazyList.create (x, input)
+
+(* Evals `p' but without consuming any input *)
+let scan p =
+    fun input -> (p >>= fun x -> return_input x input) input
 
 let rec many p =
     let continue =
@@ -134,31 +134,30 @@ let end_by1 p sep = many1 (p >>= fun x -> sep >> return x)
 
 let many_till p until = many p >>@ drop until
 
-let not_followed_by p =
-    let pred_not p =
-        scan >>= fun x ->
-            if not (p x) then return x else fail
-    in drop (pred_not p)
-
 let rec count n p =
     match n with
     | n when n < 0 -> fail
     | 0            -> mzero
     | n            -> p >>:: count (n - 1) p
 
-let pred p =
-    item >>= fun x ->
-        if p x then return x else fail
+let pred p f =
+    p >>= fun x -> if f x then return x else fail
 
-let any = pred (fun _ -> true)
+let pred_char f = pred item f
 
-let char c = pred (( = ) c)
+let not_followed_by' p f = drop (scan (pred p (fun x -> not (f x))))
 
-let digit = pred (fun c -> '0' <= c && c <= '9')
+let not_followed_by c = not_followed_by' item (( = ) c)
 
-let lower = pred (fun c -> 'a' <= c && c <= 'z')
+let any = pred_char (fun _ -> true)
 
-let upper = pred (fun c -> 'A' <= c && c <= 'Z')
+let char c = pred_char (( = ) c)
+
+let digit = pred_char (fun c -> '0' <= c && c <= '9')
+
+let lower = pred_char (fun c -> 'a' <= c && c <= 'z')
+
+let upper = pred_char (fun c -> 'A' <= c && c <= 'Z')
 
 let letter = lower ||| upper
 

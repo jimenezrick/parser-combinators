@@ -190,7 +190,7 @@ let () =
     assert (r = run_test p s)
 
 let () =
-    let p = many1 any >>@ not_followed_by (( = ) ';') in
+    let p = many1 any >>@ not_followed_by ';' in
     let s = "AB6;" in
     let r = "AB" in
     assert (r = run_test p s)
@@ -200,17 +200,6 @@ let () =
     let s = "  1  2   3  end" in
     let r = ["1"; "2"; "3"; "end"] in
     assert (Some (List.map Backpack.Str.explode r) = Parser.run_string_parser p s)
-
-
-
-
-
-
-
-
-
-
-
 
 let () =
     let p = count 3 digit in
