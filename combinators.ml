@@ -14,8 +14,7 @@ let mzero = return []
 
 let ( >>= ) p f =
     let f' = fun (x, input') -> f x input' in
-    fun input ->
-        LazyList.concat (LazyList.map f' (p input))
+    fun input -> LazyList.concat (LazyList.map f' (p input))
 
 let ( >> ) p q = p >>= fun _ -> q
 
